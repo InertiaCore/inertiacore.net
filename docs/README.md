@@ -19,7 +19,7 @@ You will be asked to enter a project name and to select the front-end library yo
 
 This will create a new project with the name you provide.
 
-You can choose between a React or Vue project.
+You can choose between a React, Vue, or Svelte project.
 
 ### Run the project
 
