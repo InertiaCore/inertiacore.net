@@ -1,85 +1,18 @@
-# Installation
+# JavaScript apps the monolith way
 
-Use the following steps to install [InertiaCore](https://github.com/kapi2289/InertiaCore) on your machine.
+Inertia is a modern approach to building classic server-driven web apps. [They](https://inertiajs.com) call it the modern monolith.
 
-## Prerequisites
+Inertia allows you to create fully client-side rendered, single-page apps, without the complexity that comes with modern SPAs. It does this by leveraging existing server-side patterns that you already love.
 
-- .NET 6.0 or higher
-- Node.js 18.0 or higher
+Inertia has no client-side routing, nor does it require an API. Simply build controllers and page views like you've always done! Inertia works great with any backend framework, but we've fine-tuned it for [.NET](https://dotnet.microsoft.com/).
 
-## New Project
+## Not a framework
 
-You can use one of our starter kits to get started quickly.
+Inertia isn't a framework, nor is it a replacement for your existing server-side or client-side frameworks. Rather, it's designed to work with them. Think of Inertia as glue that connects the two. Inertia does this via adapters. They currently have three official client-side adapters (React, Vue, and Svelte). This site focuses on third-party adapter for .NET.
 
-```bash
-npx @inertiacore/create@latest
-```
+## Next steps
 
-You will be asked to enter a project name and to select the front-end library you want to use.
+Want to learn a bit more before diving in? Check out the [who is it for](/who-is-it-for) and [how it works](/how-it-works) pages. Or, if you're ready to get started, jump right into the [quick start guide](/core/quick-start.md).
 
-This will create a new project with the name you provide.
-
-You can choose between a React, Vue, or Svelte project.
-
-### Run the project
-
-Once you have created the project, you can run it using the following commands.
-
-Run the following command to start the dotnet development server:
-
-```bash
-dotnet run
-```
-
-In another terminal, run the following command to start the React or Vue development server:
-
-```bash
-cd ClientApp
-npm run dev
-```
-
-This will start the development server and you can access the application at `http://localhost:5266` or `https://localhost:7266` if you are using HTTPS.
-
-## Existing Project
-
-You need to add few lines to the `Program.cs` or `Starup.cs` file.
-
-```csharp
-using InertiaCore.Extensions;
-
-[...]
-
-builder.Services.AddInertia();
-
-[...]
-
-app.UseInertia();
-```
-
-Create a file `/Views/App.cshtml`.
-
-```html
-@using InertiaCore
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title inertia>My App</title>
-  </head>
-  <body>
-    @await Inertia.Html(Model)
-
-    <script src="/js/app.js"></script>
-  </body>
-</html>
-```
-
-You can change the root view file using:
-
-```csharp
-builder.Services.AddInertia(options =>
-{
-    options.RootView = "~/Views/Main.cshtml";
-});
-```
+> [!NOTE]
+> This site is a fork of the official [Inertia.js](https://inertiajs.com) documentation. We simply adapted it for ease of use with InertiaCore.

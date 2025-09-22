@@ -1,6 +1,6 @@
 # Vite Helper
 
-A Vite helper class is available to automatically load your generated styles or scripts by simply using the `@Vite.Input("src/main.tsx")` helper. You can also enable HMR when using React by using the `@Vite.ReactRefresh()` helper. This pairs well with the `laravel-vite-plugin` npm package.
+A Vite helper class is available to automatically load your generated styles or scripts by simply using the `@Vite.Input("src/main.tsx")` helper. You can also enable HMR when using React by using the `@Vite.ReactRefresh()` helper. This pairs well with the `@inertiacore/vite-plugin` npm package.
 
 To get started with the Vite Helper, you will need to add one more line to the `Program.cs` or `Starup.cs` file.
 
@@ -19,6 +19,38 @@ builder.Services.AddViteHelper(options =>
     options.BuildDirectory = "build";
     options.HotFile = "hot";
     options.ManifestFilename = "manifest.json";
+});
+```
+
+Here are the default values for the Vite Plugin options:
+
+```ts
+import { defineConfig } from "vite";
+import inertiacore from "@inertiacore/vite-plugin";
+
+export default defineConfig({
+  plugins: [
+    //... other plugins,
+    inertiacore({
+      input: ["src/app.ts"],
+      refresh: true,
+    }),
+  ],
+});
+
+// Same as above, but with default values
+export default defineConfig({
+  plugins: [
+    //... other plugins,
+    inertiacore({
+      input: ["src/app.ts"],
+      refresh: true,
+      publicDirectory: "../wwwroot",
+      buildDirectory: "build",
+      hotFile: "hot",
+      manifestFilename: "manifest.json",
+    }),
+  ],
 });
 ```
 
@@ -49,14 +81,13 @@ with the corresponding `vite.config.js`, which is recommended to create in the `
 ```js
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import laravel from "laravel-vite-plugin";
+import inertiacore from "@inertiacore/vite-plugin";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    laravel({
+    inertiacore({
       input: ["src/main.tsx"],
-      publicDirectory: "../wwwroot/",
     }),
     react(),
   ],
@@ -90,13 +121,12 @@ with the corresponding `vite.config.js`, which is recommended to create in the `
 ```js
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import laravel from "laravel-vite-plugin";
+import inertiacore from "@inertiacore/vite-plugin";
 
 export default defineConfig({
   plugins: [
-    laravel({
+    inertiacore({
       input: ["src/app.ts"],
-      publicDirectory: "../wwwroot/",
       refresh: true,
     }),
     vue({

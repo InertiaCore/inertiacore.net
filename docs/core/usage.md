@@ -1,5 +1,9 @@
 # Usage
 
+InertiaCore is a server-side adapter for Inertia.js. It allows you to use Inertia.js with ASP.NET Core.
+
+It essentially allows you to use a front-end framework (React, Vue, Svelte) as if it were a Razor view, but maintain the SPA experience. It dramatically simplifies the process of building a modern web application with a modern front-end framework paired with a server-side framework.
+
 ## Routes
 
 To pass data to a page component, use `Inertia.Render()`.
