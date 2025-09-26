@@ -59,7 +59,7 @@ We recommend creating a custom HandleInertiaRequests middleware. This middleware
 ```csharp
 // Program.cs
 app.UseInertia();
-app.UseMiddleware<CsrfMiddleware>();
+app.UseMiddleware<HandleInertiaRequests>();
 ```
 
 ```csharp
