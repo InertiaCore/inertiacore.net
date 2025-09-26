@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using InertiaCore;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("[controller]")]
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
