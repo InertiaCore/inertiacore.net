@@ -289,6 +289,28 @@ import { router } from "@inertiajs/svelte";
 router.on("navigate", () => router.flushAll());
 ```
 
+### Automatic cache flushing
+
+By default, Inertia does not automatically flush the prefetch cache when you navigate to new pages. Cached data is only evicted when it expires based on the cache duration. If you want to flush all cached data on every navigation, you can set up an event listener.
+
+```js
+// framework: vue
+import { router } from "@inertiajs/vue3";
+router.on("navigate", () => router.flushAll());
+```
+
+```js
+// framework: react
+import { router } from "@inertiajs/react";
+router.on("navigate", () => router.flushAll());
+```
+
+```js
+// framework: svelte
+import { router } from "@inertiajs/svelte";
+router.on("navigate", () => router.flushAll());
+```
+
 ### Invalidate on requests
 
 To automatically invalidate caches when making requests, pass an `invalidateCacheTags` prop to the `Form` component. The specified tags will be flushed when the form submission succeeds.

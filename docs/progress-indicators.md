@@ -33,6 +33,71 @@ createInertiaApp({
 });
 ```
 
+## Programmatic access
+
+When you need to control the progress indicator outside of Inertia requests, for example, when making requests with
+Axios or other libraries, you can use Inertia's progress methods directly.
+
+```js
+// framework: vue
+import { progress } from "@inertiajs/vue3";
+progress.start(); // Begin progress animation
+progress.set(0.25); // Set to 25% complete
+progress.finish(); // Complete and fade out
+progress.reset(); // Reset to start
+progress.remove(); // Complete and remove from DOM
+progress.hide(); // Hide progress bar
+progress.reveal(); // Show progress bar
+progress.isStarted(); // Returns boolean
+progress.getStatus(); // Returns current percentage or null
+```
+
+```js
+// framework: react
+import { progress } from "@inertiajs/react";
+progress.start(); // Begin progress animation
+progress.set(0.25); // Set to 25% complete
+progress.finish(); // Complete and fade out
+progress.reset(); // Reset to start
+progress.remove(); // Complete and remove from DOM
+progress.hide(); // Hide progress bar
+progress.reveal(); // Show progress bar
+progress.isStarted(); // Returns boolean
+progress.getStatus(); // Returns current percentage or null
+```
+
+```js
+// framework: svelte
+import { progress } from "@inertiajs/svelte";
+progress.start(); // Begin progress animation
+progress.set(0.25); // Set to 25% complete
+progress.finish(); // Complete and fade out
+progress.reset(); // Reset to start
+progress.remove(); // Complete and remove from DOM
+progress.hide(); // Hide progress bar
+progress.reveal(); // Show progress bar
+progress.isStarted(); // Returns boolean
+progress.getStatus(); // Returns current percentage or null
+```
+
+The `hide()` and `reveal()` methods work together to prevent conflicts when separate
+parts of your code need to control progress visibility. Each `hide()` call increments an internal counter,
+while `reveal()` decrements it. The progress bar only appears when this counter reaches zero.
+
+However, `reveal()` accepts an optional `force` parameter that bypasses this counter.
+Inertia uses this pattern internally to hide progress during prefetching while ensuring it appears for actual navigation.
+
+```js
+progress.hide(); // Counter = 1, bar hidden
+progress.hide(); // Counter = 2, bar still hidden
+progress.reveal(); // Counter = 1, bar still hidden
+progress.reveal(); // Counter = 0, bar now visible
+// Force reveal bypasses the counter
+progress.reveal(true);
+```
+
+> ![NOTICE] If you've disabled the progress indicator with `progress: false` in `createInertiaApp()`, these programmatic methods will not work.
+
 ## Custom
 
 It's also possible to setup your own custom page loading indicators using Inertia [events](/events). Let's explore how to do this using the [NProgress](https://ricostacruz.com/nprogress/) library as an example.

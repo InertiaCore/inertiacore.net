@@ -1,6 +1,94 @@
 # Merging props
 
-By default, Inertia overwrites props with the same name when reloading a page. However, there are instances, such as pagination or infinite scrolling, where that is not the desired behavior. In these cases, you can merge props instead of overwriting them.
+Inertia overwrites props with the same name when reloading a page. However, you may need to merge new data with existing data instead. For example, when implementing a "load more" button for paginated results.
+
+Prop merging only works during [partial reloads](/partial-reloads). Full page visits will always replace props entirely, even if you've marked them for merging.
+
+## Merge methods
+
+To merge a prop instead of overwriting it, you may use the `Inertia::merge()` method when returning your response.
+
+```csharp
+var allTags = new[] {
+    "ASP.NET Core", "React", "Vue", "Tailwind", "Inertia",
+    "C#", "JavaScript", "TypeScript", "Docker", "Vite"
+};
+
+var page = int.Parse(context.Request.Query["page"].FirstOrDefault() ?? "1");
+var perPage = 5;
+var offset = (page - 1) * perPage;
+var tags = allTags.Skip(offset).Take(perPage).ToArray();
+
+return Inertia.Render("Tags/Index", new
+{
+    tags = Inertia.Merge(tags)
+});
+```
+
+The `Inertia::merge()` method will append new items to existing arrays at the root level. You may change this behavior to prepend items instead.
+
+```csharp
+// Append at root level (default)...
+Inertia.Merge(items);
+// Prepend at root level...
+Inertia.Merge(items).Prepend();
+```
+
+For more precise control, you can target specific nested properties for merging while replacing the rest of the object.
+
+```csharp
+// Only append to the 'data' array, replace everything else...
+Inertia.Merge(User::paginate()).Append('data');
+// Prepend to the 'messages' array...
+Inertia.Merge(chatData).Prepend('messages');
+```
+
+You can combine multiple operations and target several properties at once.
+
+```csharp
+
+Inertia.Merge(forumData).Append('posts').Prepend('announcements');
+// Target multiple properties...
+Inertia.Merge(dashboardData).Append(['notifications', 'activities']);
+```
+
+On the client side, Inertia handles all the merging automatically according to your server-side configuration.
+
+## Matching items
+
+When merging arrays, you may use the `matchOn` parameter to match existing items by a specific field and update them instead of appending new ones.
+
+```csharp
+// Match posts by ID, update existing ones...
+Inertia.Merge(postData).Append('data', matchOn: 'id');
+// Multiple properties with different match fields...
+Inertia.Merge(complexData).Append(['users.data' => 'id', 'messages' => 'uuid']);
+```
+
+In the first example, Inertia will iterate over the `data` array and attempt to match each item by its `id` field. If a match is found, the existing item will be replaced. If no match is found, the new item will be appended.
+
+## Deep merge
+
+Instead of specifying which nested paths should be merged, you may use `Inertia.DeepMerge()` to ensure a deep merge of the entire structure.
+
+```csharp
+
+app.MapGet("/chat", (HttpContext context) =>
+{
+    var chatData = [
+        'messages' => [
+            ['id' => 4, 'text' => 'Hello there!', 'user' => 'Alice'],
+            ['id' => 5, 'text' => 'How are you?', 'user' => 'Bob'],
+        ],
+    ];
+    return Inertia.Render("Chat", new
+    {
+        chat = Inertia.DeepMerge(chatData)->MatchOn('messages.id'),
+    });
+});
+```
+
+> ![NOTICE] `Inertia.DeepMerge()` was introduced before `Inertia.Merge()` had support for prepending and targeting nested paths. In most cases, `Inertia.Merge()` with its append and prepend methods should be sufficient.
 
 ## Server side
 
@@ -63,6 +151,11 @@ You may also pass an array of keys to `matchOn` to specify multiple keys for mat
 ## Client side
 
 On the client side, Inertia detects that this prop should be merged. If the prop returns an array, it will append the response to the current prop value. If it's an object, it will merge the response with the current prop value. If you have opted to `DeepMerge`, Inertia ensures a deep merge of the entire structure.
+
+## Client side visits
+
+You can also merge props directly on the client side without making a server request using [client side visits](/manual-visits#client-side-visits). Inertia provides [prop helper methods](/manual-visits#prop-helpers) that allow you to append, prepend, or replace prop
+values.
 
 ## Combining with deferred props
 

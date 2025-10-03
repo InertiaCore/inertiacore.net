@@ -476,6 +476,84 @@ router.replace({
 
 Make sure that any route you push on the client side is also defined on the server side. If the user refreshes the page, the server will need to know how to render the page.
 
+### Prop helpers
+
+Inertia provides three helper methods for updating page props without making server requests. These
+methods are shortcuts to `router.replace()` and automatically set `preserveScroll` and `preserveState` to `true`.
+
+```js
+// framework: vue
+
+import { router } from "@inertiajs/vue3";
+// Replace a prop value...
+router.replaceProp("user.name", "Jane Smith");
+// Append to an array prop...
+router.appendToProp("messages", { id: 4, text: "New message" });
+// Prepend to an array prop...
+router.prependToProp("tags", "urgent");
+```
+
+```js
+// framework: react
+import { router } from "@inertiajs/react";
+// Replace a prop value...
+router.replaceProp("user.name", "Jane Smith");
+// Append to an array prop...
+router.appendToProp("messages", { id: 4, text: "New message" });
+// Prepend to an array prop...
+router.prependToProp("tags", "urgent");
+```
+
+```js
+// framework: svelte
+import { router } from "@inertiajs/svelte";
+// Replace a prop value...
+router.replaceProp("user.name", "Jane Smith");
+// Append to an array prop...
+router.appendToProp("messages", { id: 4, text: "New message" });
+// Prepend to an array prop...
+router.prependToProp("tags", "urgent");
+```
+
+All three methods support dot notation for nested props and can accept a callback function that receives the
+current value as the first argument and the current page props as the second argument.
+
+```js
+// framework: vue
+import { router } from '@inertiajs/vue3'
+router.prependToProp('notifications', (current, props) => {
+  return {
+    id: Date.now(),
+    message: \`Hello \${props.user.name}\`,
+    timestamp: new Date()
+  }
+})
+```
+
+```js
+// framework: react
+import { router } from '@inertiajs/react'
+router.prependToProp('notifications', (current, props) => {
+  return {
+    id: Date.now(),
+    message: \`Hello \${props.user.name}\`,
+    timestamp: new Date()
+  }
+})
+```
+
+```js
+// framework: svelte
+import { router } from '@inertiajs/svelte'
+router.prependToProp('notifications', (current, props) => {
+  return {
+    id: Date.now(),
+    message: \`Hello \${props.user.name}\`,
+    timestamp: new Date()
+  }
+})
+```
+
 ## State preservation
 
 By default, page visits to the same page create a fresh page component instance. This causes any local state, such as form inputs, scroll positions, and focus states to be lost.
