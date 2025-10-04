@@ -32,7 +32,7 @@ Once the Inertia app has been booted, all subsequent requests to the site are ma
 
 When the server detects the `X-Inertia` header, instead of responding with a full HTML document, it returns a JSON response with an encoded [page object](#the-page-object).
 
-```jsonc
+```json
 {
   "component": "Event",
   "props": {
@@ -98,7 +98,7 @@ On standard full page visits, the page object is JSON encoded into the `data-pag
 
 A minimal page object contains the core properties.
 
-```jsonc
+```json
 {
   "component": "User/Edit",
   "props": {
@@ -117,7 +117,7 @@ A minimal page object contains the core properties.
 
 When using deferred props, the page object includes a `deferredProps` configuration. Note that deferred props are not included in the initial props since they are loaded in a subsequent request.
 
-```jsonc
+```json
 {
   "component": "Posts/Index",
   "props": {
@@ -140,7 +140,7 @@ When using deferred props, the page object includes a `deferredProps` configurat
 
 When using merge props, additional configuration is included.
 
-```jsonc
+```json
 {
   "component": "Feed/Index",
   "props": {
@@ -170,7 +170,7 @@ When using merge props, additional configuration is included.
 
 When using [Infinite scroll](/infinite-scroll), the page object includes a `scrollProps`configuration.
 
-```jsonc
+```json
 {
   "component": "Posts/Index",
   "props": {
@@ -222,7 +222,7 @@ The `X-Inertia-Partial-Data` header is a comma separated list of the desired pro
 
 The `X-Inertia-Partial-Component` header includes the name of the component that is being partially reloaded. This is necessary, since partial reloads only work for requests made to the same page component. If the final destination is different for some reason (eg. the user was logged out and is now on the login page), then no partial reloading will occur.
 
-```jsonc
+```json
 {
     "component": "Events",
     "props": {
