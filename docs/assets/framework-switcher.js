@@ -67,17 +67,34 @@
   style.textContent = css;
   document.head.appendChild(style);
 
-  const CONFIG = {
-    storageKey: "docsify-fw",
-    frameworks: ["react", "vue", "svelte", "svelte4", "svelte5"],
-    defaultFramework: "react",
-    // More flexible pattern to catch various markers
-    markerPattern: /^\s*(?:\/\/\s*|#\s*|<!--\s*)?framework:\s*(react|vue|svelte[45]?|vuex)(?:\s*-->)?/i,
-    labelPattern: /^(React|Vue|Svelte(?:\s*[45])?):?\s*$/i,
-    maxLinesToCheck: 5
+  // Get user configuration from docsify options
+  const userConfig =
+    (window.$docsify && window.$docsify.frameworkSwitcher) || {};
+
+  // Helper to convert string patterns to RegExp
+  const toRegExp = (pattern) => {
+    if (!pattern) return null;
+    if (pattern instanceof RegExp) return pattern;
+    if (typeof pattern === 'string') {
+      const match = pattern.match(/^\/(.+)\/([gimsuy]*)$/);
+      if (match) return new RegExp(match[1], match[2]);
+      return new RegExp(pattern);
+    }
+    return null;
   };
 
-  let currentFramework = localStorage.getItem(CONFIG.storageKey) || CONFIG.defaultFramework;
+  const CONFIG = {
+    storageKey: userConfig.storageKey || "docsify-fw",
+    frameworks: userConfig.frameworks || [],
+    defaultFramework: userConfig.defaultFramework || "",
+    frameworkNames: userConfig.frameworkNames || {},
+    markerPattern: toRegExp(userConfig.markerPattern),
+    labelPattern: toRegExp(userConfig.labelPattern),
+    maxLinesToCheck: userConfig.maxLinesToCheck || 5,
+  };
+
+  let currentFramework =
+    localStorage.getItem(CONFIG.storageKey) || CONFIG.defaultFramework;
 
   function setFramework(framework) {
     if (currentFramework === framework) return;
@@ -89,15 +106,9 @@
   }
 
   function normalizeFrameworkName(name) {
-    const normalized = name.toLowerCase().replace(/\s+/g, '');
+    const normalized = name.toLowerCase().replace(/\s+/g, "");
 
-    // Handle common variations and typos
-    if (normalized === 'vuex') return 'vue';
-    if (normalized === 'svelte4') return 'svelte4';
-    if (normalized === 'svelte5') return 'svelte5';
-    if (normalized === 'svelte') return 'svelte';
-    if (normalized === 'vue3') return 'vue';
-    if (normalized === 'react') return 'react';
+    // TODO: Handle common variations and typos
 
     return normalized;
   }
@@ -108,55 +119,54 @@
       return codeElement.dataset.framework;
     }
 
-    // Check class names first
-    for (const framework of CONFIG.frameworks) {
-      if (codeElement.classList.contains(framework)) {
-        codeElement.dataset.framework = framework;
-        return framework;
-      }
-    }
-
     const content = codeElement.textContent || "";
     const lines = content.split(/\r?\n/);
 
-    // Check first few lines for framework markers
+    // Check first few lines for framework markers (prioritize explicit markers)
     for (let i = 0; i < Math.min(lines.length, CONFIG.maxLinesToCheck); i++) {
       const line = lines[i];
 
       if (!line.trim()) continue;
 
       // Check for comment-style markers
-      const markerMatch = line.match(CONFIG.markerPattern);
-      if (markerMatch) {
-        const fw = normalizeFrameworkName(markerMatch[1]);
-        if (CONFIG.frameworks.includes(fw)) {
-          codeElement.dataset.framework = fw;
-          return fw;
+      if (CONFIG.markerPattern) {
+        const markerMatch = line.match(CONFIG.markerPattern);
+        if (markerMatch) {
+          const fw = normalizeFrameworkName(markerMatch[1]);
+          console.log('Detected framework from marker:', fw, 'from line:', line);
+          if (CONFIG.frameworks.includes(fw)) {
+            codeElement.dataset.framework = fw;
+            return fw;
+          }
         }
       }
 
       // Check for label-style markers
-      const labelMatch = line.match(CONFIG.labelPattern);
-      if (labelMatch) {
-        const framework = normalizeFrameworkName(labelMatch[1]);
-        if (CONFIG.frameworks.includes(framework)) {
-          codeElement.dataset.framework = framework;
-          return framework;
+      if (CONFIG.labelPattern) {
+        const labelMatch = line.match(CONFIG.labelPattern);
+        if (labelMatch) {
+          const framework = normalizeFrameworkName(labelMatch[1]);
+          if (CONFIG.frameworks.includes(framework)) {
+            codeElement.dataset.framework = framework;
+            return framework;
+          }
         }
       }
 
       // Stop at first non-empty, non-comment line
-      if (!line.trim().startsWith('//') &&
-          !line.trim().startsWith('#') &&
-          !line.trim().startsWith('<!--')) {
+      if (
+        !line.trim().startsWith("//") &&
+        !line.trim().startsWith("#") &&
+        !line.trim().startsWith("<!--")
+      ) {
         break;
       }
     }
 
     // Check if previous sibling is a paragraph with framework label
     const prevElement = codeElement.parentElement?.previousElementSibling;
-    if (prevElement && prevElement.tagName === 'P') {
-      const text = prevElement.textContent?.trim() || '';
+    if (prevElement && prevElement.tagName === "P" && CONFIG.labelPattern) {
+      const text = prevElement.textContent?.trim() || "";
       const labelMatch = text.match(CONFIG.labelPattern);
       if (labelMatch) {
         const framework = normalizeFrameworkName(labelMatch[1]);
@@ -164,6 +174,15 @@
           codeElement.dataset.framework = framework;
           return framework;
         }
+      }
+    }
+
+    // Finally check class names as fallback
+    for (const framework of CONFIG.frameworks) {
+      if (codeElement.classList.contains(framework)) {
+        console.log('Detected framework from class:', framework, 'classes:', codeElement.classList);
+        codeElement.dataset.framework = framework;
+        return framework;
       }
     }
 
@@ -181,7 +200,7 @@
       if (!line.trim()) continue;
 
       // Strip comment-style markers
-      if (CONFIG.markerPattern.test(line)) {
+      if (CONFIG.markerPattern && CONFIG.markerPattern.test(line)) {
         lines.splice(i, 1);
         codeElement.textContent = lines.join("\n");
         codeElement.dataset.markerStripped = "true";
@@ -189,7 +208,7 @@
       }
 
       // Strip label-style markers
-      if (CONFIG.labelPattern.test(line)) {
+      if (CONFIG.labelPattern && CONFIG.labelPattern.test(line)) {
         lines.splice(i, 1);
         codeElement.textContent = lines.join("\n");
         codeElement.dataset.markerStripped = "true";
@@ -197,9 +216,11 @@
       }
 
       // Stop at first non-empty, non-comment line
-      if (!line.trim().startsWith('//') &&
-          !line.trim().startsWith('#') &&
-          !line.trim().startsWith('<!--')) {
+      if (
+        !line.trim().startsWith("//") &&
+        !line.trim().startsWith("#") &&
+        !line.trim().startsWith("<!--")
+      ) {
         break;
       }
     }
@@ -208,14 +229,10 @@
   }
 
   function formatFrameworkName(framework) {
-    const names = {
-      react: "React",
-      vue: "Vue",
-      svelte: "Svelte",
-      svelte4: "Svelte 4",
-      svelte5: "Svelte 5"
-    };
-    return names[framework] || framework.charAt(0).toUpperCase() + framework.slice(1);
+    return (
+      CONFIG.frameworkNames[framework] ||
+      framework.charAt(0).toUpperCase() + framework.slice(1)
+    );
   }
 
   function createSwitcher(onSelect, selectedFramework, availableFrameworks) {
@@ -223,13 +240,19 @@
     container.className = "fw-switcher";
 
     // Only create buttons for frameworks that are actually present
-    availableFrameworks.forEach(framework => {
+    availableFrameworks.forEach((framework) => {
       const button = document.createElement("button");
       button.type = "button";
       button.textContent = formatFrameworkName(framework);
       button.dataset.framework = framework;
-      button.setAttribute("aria-pressed", String(framework === selectedFramework));
-      button.setAttribute("aria-label", `Switch to ${formatFrameworkName(framework)} examples`);
+      button.setAttribute(
+        "aria-pressed",
+        String(framework === selectedFramework)
+      );
+      button.setAttribute(
+        "aria-label",
+        `Switch to ${formatFrameworkName(framework)} examples`
+      );
 
       button.addEventListener("click", (e) => {
         e.preventDefault();
@@ -247,8 +270,9 @@
     let visibleFramework = null;
     let hasVisibilityChanges = false;
 
-    codeBlocks.forEach(codeBlock => {
-      const framework = codeBlock.dataset.framework || detectFramework(codeBlock);
+    codeBlocks.forEach((codeBlock) => {
+      const framework =
+        codeBlock.dataset.framework || detectFramework(codeBlock);
       if (framework) {
         const preElement = codeBlock.parentElement;
         const shouldHide = framework !== currentFramework;
@@ -273,8 +297,9 @@
       const availableFrameworks = getAvailableFrameworks(groupElement);
       if (availableFrameworks.length > 0) {
         const firstFramework = availableFrameworks[0];
-        codeBlocks.forEach(codeBlock => {
-          const framework = codeBlock.dataset.framework || detectFramework(codeBlock);
+        codeBlocks.forEach((codeBlock) => {
+          const framework =
+            codeBlock.dataset.framework || detectFramework(codeBlock);
           if (framework === firstFramework) {
             codeBlock.parentElement.classList.remove("fw-hidden");
             hasVisibilityChanges = true;
@@ -284,7 +309,11 @@
     }
 
     // Re-highlight newly visible code blocks
-    if (hasVisibilityChanges && window.Prism && window.Prism.highlightAllUnder) {
+    if (
+      hasVisibilityChanges &&
+      window.Prism &&
+      window.Prism.highlightAllUnder
+    ) {
       window.Prism.highlightAllUnder(groupElement);
     }
   }
@@ -293,15 +322,16 @@
     const frameworks = new Set();
     const codeBlocks = groupElement.querySelectorAll("pre > code");
 
-    codeBlocks.forEach(codeBlock => {
-      const framework = codeBlock.dataset.framework || detectFramework(codeBlock);
+    codeBlocks.forEach((codeBlock) => {
+      const framework =
+        codeBlock.dataset.framework || detectFramework(codeBlock);
       if (framework) {
         frameworks.add(framework);
       }
     });
 
     // Return frameworks in the preferred order
-    return CONFIG.frameworks.filter(fw => frameworks.has(fw));
+    return CONFIG.frameworks.filter((fw) => frameworks.has(fw));
   }
 
   function updateAllGroups() {
@@ -312,21 +342,21 @@
   function updateAllSwitchers() {
     const groups = document.querySelectorAll(".fw-group");
 
-    groups.forEach(groupElement => {
+    groups.forEach((groupElement) => {
       const switcher = groupElement.querySelector(".fw-switcher");
       if (!switcher) return;
 
       const availableFrameworks = getAvailableFrameworks(groupElement);
 
       // Update button visibility and selection
-      switcher.querySelectorAll("button").forEach(button => {
+      switcher.querySelectorAll("button").forEach((button) => {
         const framework = button.dataset.framework;
 
         // Hide button if framework not available
         if (!availableFrameworks.includes(framework)) {
-          button.style.display = 'none';
+          button.style.display = "none";
         } else {
-          button.style.display = '';
+          button.style.display = "";
 
           // Update selection state
           const isSelected = framework === currentFramework;
@@ -335,8 +365,13 @@
       });
 
       // If current framework isn't available, select the first available one for this group
-      if (!availableFrameworks.includes(currentFramework) && availableFrameworks.length > 0) {
-        const firstButton = switcher.querySelector(`button[data-framework="${availableFrameworks[0]}"]`);
+      if (
+        !availableFrameworks.includes(currentFramework) &&
+        availableFrameworks.length > 0
+      ) {
+        const firstButton = switcher.querySelector(
+          `button[data-framework="${availableFrameworks[0]}"]`
+        );
         if (firstButton) {
           firstButton.setAttribute("aria-pressed", "true");
         }
@@ -357,29 +392,25 @@
     }
 
     let sibling = lastPre.nextSibling;
-    let distance = 0;
 
     while (sibling && sibling !== currentPre) {
-      // Count only element nodes that aren't empty text
+      // If we encounter any non-empty, non-framework-label element, they're not adjacent
       if (sibling.nodeType === Node.ELEMENT_NODE) {
         // Skip empty paragraphs
-        if (sibling.tagName === 'P' && !sibling.textContent.trim()) {
+        if (sibling.tagName === "P" && !sibling.textContent.trim()) {
           sibling = sibling.nextSibling;
           continue;
         }
         // Skip paragraphs with just framework labels
-        if (sibling.tagName === 'P') {
-          const text = sibling.textContent?.trim() || '';
-          if (CONFIG.labelPattern.test(text)) {
+        if (sibling.tagName === "P") {
+          const text = sibling.textContent?.trim() || "";
+          if (CONFIG.labelPattern && CONFIG.labelPattern.test(text)) {
             sibling = sibling.nextSibling;
             continue;
           }
         }
-        distance++;
-        // Reduce distance threshold to ensure proper grouping
-        if (distance > 1) {
-          return false;
-        }
+        // Any other element breaks adjacency
+        return false;
       }
       sibling = sibling.nextSibling;
     }
@@ -390,17 +421,18 @@
   function processPage() {
     // Clear any existing processing
     const existingGroups = document.querySelectorAll(".fw-group");
-    existingGroups.forEach(group => {
+    existingGroups.forEach((group) => {
       const codeBlocks = group.querySelectorAll("pre > code");
-      codeBlocks.forEach(block => {
+      codeBlocks.forEach((block) => {
         delete block.dataset.framework;
         delete block.dataset.markerStripped;
       });
     });
 
     // Find all ungrouped code blocks
-    const allCodeBlocks = Array.from(document.querySelectorAll("pre > code"))
-      .filter(codeBlock => !codeBlock.closest(".fw-group"));
+    const allCodeBlocks = Array.from(
+      document.querySelectorAll("pre > code")
+    ).filter((codeBlock) => !codeBlock.closest(".fw-group"));
 
     let currentBatch = [];
     let batchFrameworks = new Set();
@@ -412,7 +444,7 @@
         return;
       }
 
-      const preElements = currentBatch.map(code => code.parentElement);
+      const preElements = currentBatch.map((code) => code.parentElement);
       const parentElement = preElements[0].parentNode;
 
       // Create the group
@@ -423,16 +455,25 @@
       parentElement.insertBefore(group, preElements[0]);
 
       // Get available frameworks for this group (in preferred order)
-      const availableFrameworks = CONFIG.frameworks.filter(fw => batchFrameworks.has(fw));
+      const availableFrameworks = CONFIG.frameworks.filter((fw) =>
+        batchFrameworks.has(fw)
+      );
 
       // Determine which framework to show initially
       let selectedFramework = currentFramework;
-      if (!availableFrameworks.includes(currentFramework) && availableFrameworks.length > 0) {
+      if (
+        !availableFrameworks.includes(currentFramework) &&
+        availableFrameworks.length > 0
+      ) {
         selectedFramework = availableFrameworks[0];
       }
 
       // Create and add switcher with only available frameworks
-      const switcher = createSwitcher(setFramework, selectedFramework, availableFrameworks);
+      const switcher = createSwitcher(
+        setFramework,
+        selectedFramework,
+        availableFrameworks
+      );
       group.appendChild(switcher);
 
       // Collect all elements between first and last pre (including framework labels)
@@ -444,9 +485,9 @@
         const next = current.nextSibling;
 
         // Include framework label paragraphs
-        if (current.tagName === 'P') {
-          const text = current.textContent?.trim() || '';
-          if (CONFIG.labelPattern.test(text)) {
+        if (current.tagName === "P") {
+          const text = current.textContent?.trim() || "";
+          if (CONFIG.labelPattern && CONFIG.labelPattern.test(text)) {
             elementsToMove.push(current);
           }
         } else if (preElements.includes(current)) {
@@ -457,14 +498,15 @@
       }
 
       // Move all collected elements to the group
-      elementsToMove.forEach(element => {
+      elementsToMove.forEach((element) => {
         group.appendChild(element);
       });
 
       // Set initial visibility
       const codeBlocks = group.querySelectorAll("pre > code");
-      codeBlocks.forEach(codeBlock => {
-        const framework = codeBlock.dataset.framework || detectFramework(codeBlock);
+      codeBlocks.forEach((codeBlock) => {
+        const framework =
+          codeBlock.dataset.framework || detectFramework(codeBlock);
         if (framework) {
           const preElement = codeBlock.parentElement;
           if (framework !== selectedFramework) {
@@ -493,20 +535,12 @@
         stripMarkerLine(codeBlock);
 
         // Check if this should be part of current batch
-        const isAdjacent = currentBatch.length === 0 || isAdjacentBlock(currentBatch, codeBlock);
+        const isAdjacent =
+          currentBatch.length === 0 || isAdjacentBlock(currentBatch, codeBlock);
 
         if (isAdjacent) {
-          // Additional check: ensure we're not merging different framework sets
-          // If we already have all frameworks in the batch, start a new group
-          if (batchFrameworks.size >= 3 && !batchFrameworks.has(framework)) {
-            createGroupFromBatch();
-            currentBatch = [codeBlock];
-            batchFrameworks.clear();
-            batchFrameworks.add(framework);
-          } else {
-            currentBatch.push(codeBlock);
-            batchFrameworks.add(framework);
-          }
+          currentBatch.push(codeBlock);
+          batchFrameworks.add(framework);
         } else {
           createGroupFromBatch();
           currentBatch = [codeBlock];
@@ -540,5 +574,7 @@
   }
 
   window.$docsify = window.$docsify || {};
-  window.$docsify.plugins = (window.$docsify.plugins || []).concat(frameworkSwitcherPlugin);
+  window.$docsify.plugins = (window.$docsify.plugins || []).concat(
+    frameworkSwitcherPlugin
+  );
 })();

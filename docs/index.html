@@ -59,11 +59,30 @@
           errorText: "❌",
           successText: "✅",
         },
+        versions: [
+          { folder: "v2", label: "v2.0.0", default: true },
+          { folder: "v1", label: "v1.0.0", default: false },
+        ],
+        versionSelectorLabel: "Version",
+        frameworkSwitcher: {
+          frameworks: ["react", "vue", "svelte", "svelte4", "svelte5"],
+          defaultFramework: "react",
+          frameworkNames: {
+            react: "React",
+            vue: "Vue",
+            svelte: "Svelte",
+            svelte4: "Svelte 4",
+            svelte5: "Svelte 5",
+          },
+          markerPattern:
+            /^\s*(?:\/\/\s*|#\s*|<!--\s*)?framework:\s*(react|vue|svelte[45]?|vuex)(?:\s*-->)?/i,
+          labelPattern: /^(React|Vue|Svelte(?:\s*[45])?):?\s*$/i,
+        },
       };
     </script>
-    <script src="/docs/assets/framework-switcher.js"></script>
     <script src="/docs/assets/on-this-page.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/docsify@4"></script>
+    <script src="/docs/assets/framework-switcher.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-csharp.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-typescript.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-javascript.min.js"></script>
