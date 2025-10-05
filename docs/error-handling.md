@@ -18,6 +18,12 @@ In production you will want to return a proper Inertia error response instead of
 When building ASP.NET Core applications, you can accomplish this by configuring a custom exception handling middleware in your application's startup configuration.
 
 ```csharp
+// Program.cs
+app.UseInertia();
+app.UseMiddleware<ErrorHandlingMiddleware>();
+```
+
+```csharp
 using Microsoft.AspNetCore.Diagnostics;
 using InertiaCore;
 
@@ -95,7 +101,8 @@ const description = computed(() => {
 ```
 
 ```jsx
-// framework: reactexport default function ErrorPage({ status }) {
+// framework: react
+export default function ErrorPage({ status }) {
   const title = {
     503: "503: Service Unavailable",
     500: "500: Server Error",
