@@ -42,7 +42,7 @@ Remember to add `Inertia.Head()` to your layout:
 
 ## Install dependencies
 
-If you are not using an ASP.NET Core template and would like to manually configure SSR, we'll first install the additional dependencies required for server-side rendering. This is only necessary for the Vue adapters, so you can skip this step if you're using React or Svelte.
+If you are not using an InertiaCore template and would like to manually configure SSR, we'll first install the additional dependencies required for server-side rendering. This is only necessary for the Vue adapters, so you can skip this step if you're using React or Svelte.
 
 Vue:
 

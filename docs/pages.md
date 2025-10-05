@@ -154,7 +154,7 @@ export default function Layout({ children }) {
 ```svelte
 // framework: svelte5
 <script>
-  import { inertia } from "@inertiajs/svelte";
+  import { inertia, Link } from "@inertiajs/svelte";
   let { children } = $props();
 </script>
 <main>
