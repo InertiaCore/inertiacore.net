@@ -7,8 +7,8 @@
       right: 0;
       width: 280px;
       height: 100vh;
-      background: #2d3748;
-      border-left: 1px solid #4a5568;
+      background: var(--sidebar-bg, var(--background, #2d3748));
+      border-left: 1px solid var(--border-color, var(--borderColor, #4a5568));
       padding: 5rem 1.5rem 2rem 1.5rem;
       overflow-y: auto;
       z-index: 5;
@@ -16,7 +16,7 @@
     }
 
     .on-this-page h3 {
-      color: #a0aec0;
+      color: var(--text-color-tertiary, var(--textColor, #a0aec0));
       font-size: 0.875rem;
       font-weight: 600;
       text-transform: uppercase;
@@ -38,7 +38,7 @@
 
     .on-this-page a {
       display: block;
-      color: #cbd5e0;
+      color: var(--sidebar-link-color, var(--textColor, #cbd5e0));
       text-decoration: none;
       padding: 0.5rem 0;
       font-size: 0.875rem;
@@ -49,21 +49,21 @@
     }
 
     .on-this-page a:hover {
-      color: #fff;
-      border-left-color: #4a5568;
+      color: var(--sidebar-link-hover-color, var(--theme-color, #fff));
+      border-left-color: var(--border-color, var(--borderColor, #4a5568));
     }
 
     .on-this-page a.active {
-      color: #fff;
-      border-left-color: #60a5fa;
-      background: rgba(96, 165, 250, 0.1);
+      color: var(--sidebar-link-active-color, var(--theme-color, #fff));
+      border-left-color: var(--theme-color, #60a5fa);
+      background: var(--sidebar-link-active-bg, rgba(96, 165, 250, 0.1));
     }
 
     /* Nested items */
     .on-this-page ul ul a {
       padding-left: 1.5rem;
       font-size: 0.8125rem;
-      color: #a0aec0;
+      color: var(--text-color-secondary, var(--textColor, #a0aec0));
     }
 
     .on-this-page ul ul ul a {
@@ -74,24 +74,24 @@
     .view-as-markdown {
       margin-top: 2rem;
       padding-top: 1rem;
-      border-top: 1px solid #4a5568;
+      border-top: 1px solid var(--border-color, var(--borderColor, #4a5568));
     }
 
     .view-as-markdown a {
       display: inline-flex;
       align-items: center;
-      color: #60a5fa;
+      color: var(--theme-color, #60a5fa);
       text-decoration: none;
       font-size: 0.875rem;
       padding: 0.5rem 0.75rem;
-      border: 1px solid #4a5568;
+      border: 1px solid var(--border-color, var(--borderColor, #4a5568));
       border-radius: 0.375rem;
       transition: all 0.2s ease;
     }
 
     .view-as-markdown a:hover {
-      background: rgba(96, 165, 250, 0.1);
-      border-color: #60a5fa;
+      background: var(--sidebar-link-hover-bg, rgba(96, 165, 250, 0.1));
+      border-color: var(--theme-color, #60a5fa);
     }
 
     /* Adjust main content to account for right sidebar */
