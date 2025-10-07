@@ -14,7 +14,17 @@
       title="docsify-darklight-theme"
       type="text/css"
     />
-    <link rel="stylesheet" href="/docs/assets/prism-monokai.css" />
+    <link
+      rel="stylesheet"
+      href="/docs/assets/prism-light.css"
+      id="prism-theme-light"
+    />
+    <link
+      rel="stylesheet"
+      href="/docs/assets/prism-monokai.css"
+      id="prism-theme-dark"
+      disabled
+    />
   </head>
   <body>
     <div id="app"></div>
@@ -84,6 +94,40 @@
     <script src="/docs/assets/on-this-page.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/docsify@4"></script>
     <script src="/docs/assets/framework-switcher.js"></script>
+    <script>
+      // Switch Prism theme based on dark/light mode
+      function updatePrismTheme() {
+        const isDark = document.body.getAttribute("data-theme") === "dark";
+        const lightTheme = document.getElementById("prism-theme-light");
+        const darkTheme = document.getElementById("prism-theme-dark");
+
+        if (isDark) {
+          lightTheme.disabled = true;
+          darkTheme.disabled = false;
+        } else {
+          lightTheme.disabled = false;
+          darkTheme.disabled = true;
+        }
+      }
+
+      // Watch for theme changes
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (
+            mutation.type === "attributes" &&
+            mutation.attributeName === "data-theme"
+          ) {
+            updatePrismTheme();
+          }
+        });
+      });
+
+      // Start observing
+      window.addEventListener("DOMContentLoaded", () => {
+        updatePrismTheme();
+        observer.observe(document.body, { attributes: true });
+      });
+    </script>
 
     <script src="/docs/assets/prism-svelte.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-csharp.min.js"></script>
