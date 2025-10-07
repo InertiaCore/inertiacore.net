@@ -3,16 +3,26 @@
     /* On This Page Sidebar */
     .on-this-page {
       position: fixed;
-      top: 0;
+      top: 80px;
       right: 0;
       width: 280px;
-      height: 100vh;
+      height: calc(100vh - 80px);
       background: var(--sidebar-bg, var(--background, #2d3748));
-      border-left: 1px solid var(--border-color, var(--borderColor, #4a5568));
-      padding: 5rem 1.5rem 2rem 1.5rem;
+      padding: 2rem 1.5rem 2rem 1.5rem;
       overflow-y: auto;
       z-index: 5;
       box-sizing: border-box;
+    }
+
+    .on-this-page::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      right: 280px;
+      width: 1px;
+      height: 100vh;
+      background: var(--border-color, var(--borderColor, #4a5568));
+      z-index: 5;
     }
 
     .on-this-page h3 {
