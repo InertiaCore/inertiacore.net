@@ -15,7 +15,11 @@ If you want a batteries-included experience, we recommend using one of the proje
 First, install the Inertia server-side adapter using the NuGet package manager.
 
 ```bash
-dotnet add package InertiaCore
+# Release version
+dotnet add package AspNetCore.InertiaCore
+
+# Preview version
+dotnet add package InertiaCorePreview --prerelease
 ```
 
 ## Root template
